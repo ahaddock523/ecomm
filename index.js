@@ -1,5 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cookieSession = require('cookie-session');
+const usersRepo = require('./repositories/users');
+
 const app = express();
 
 // parse requests for all routes
@@ -18,9 +21,24 @@ app.get('/', (req, res) => {
     `);
 });
 
-app.post('/', (req, res) => {
-	console.log(req.body);
-	res.send('Accound created!!!');
+app.post('/', async (req, res) => {
+	const { email, password, passwordConfirmation } = req.body;
+
+	const existingUser = await usersRepo.getOneBy({ email: email });
+	if (existingUser) {
+		return res.send('Email in use');
+	}
+
+	if (password !== passwordConfirmation) {
+		return res.send('Passwords must match');
+	}
+
+	// Create a user in our user repo to represent this person
+	const user = await usersRepo.create({ email, password });
+
+	// Store the id of the user inside the users cookie
+
+	res.send('Account Created!');
 });
 
 app.listen(3000, () => {
