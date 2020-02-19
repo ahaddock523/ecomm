@@ -7,10 +7,18 @@ const app = express();
 
 // parse requests for all routes
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(
+	cookieSession({
+		keys : [
+			'lkjlkj234ls949ls34l43la'
+		]
+	})
+);
 
 app.get('/', (req, res) => {
 	res.send(`
     <div>
+        Your id is: ${req.session.userId}
         <form method="POST">
             <input name="email" placeholder="email" />
             <input name="password" placeholder="password" />
@@ -37,6 +45,7 @@ app.post('/', async (req, res) => {
 	const user = await usersRepo.create({ email, password });
 
 	// Store the id of the user inside the users cookie
+	req.session.userId = user.id;
 
 	res.send('Account Created!');
 });
