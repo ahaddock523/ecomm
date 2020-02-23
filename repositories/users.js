@@ -43,7 +43,18 @@ class UsersRepository {
 
 		await this.writeAll(records);
 
-		return attrs;
+		return record;
+	}
+
+	async comparePasswords(saved, supplied) {
+		// destructuring array and assign the result to the two variables
+		const [
+			hashed,
+			salt
+		] = saved.split('.');
+		const hashedSuppliedBuf = await scrypt(supplied, salt, 64);
+
+		return hashed === hashedSuppliedBuf.toString('hex');
 	}
 
 	async writeAll(records) {
